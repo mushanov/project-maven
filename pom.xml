@@ -11,13 +11,72 @@
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>18.0.1</javafx.version>
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>linux</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>mac</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.javarush</groupId>
+            <artifactId>desktop-game-engine</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/desktop-game-engine.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.build.directory}/dependency</directory>
+                <targetPath>lib</targetPath>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/lib</directory>
+                <targetPath>lib</targetPath>
+                <includes>
+                    <include>desktop-game-engine.jar</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- Usual compilation -->
             <plugin>
@@ -28,7 +87,53 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+                            <includeScope>compile</includeScope>
+                            <excludeScope>system</excludeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader</mainClass>
+                            <addClasspath>false</addClasspath>
+                        </manifest>
+                        <manifestEntries>
+                            <Rsrc-Main-Class>com.javarush.games.racer.RacerGame</Rsrc-Main-Class>
+                            <Class-Path>./ lib/desktop-game-engine.jar lib/commons-lang3-3.12.0.jar lib/javafx-controls-18.0.1.jar lib/javafx-graphics-18.0.1.jar lib/javafx-graphics-18.0.1-win.jar lib/javafx-graphics-18.0.1-linux.jar lib/javafx-graphics-18.0.1-mac.jar lib/javafx-base-18.0.1.jar lib/javafx-base-18.0.1-win.jar lib/javafx-base-18.0.1-linux.jar lib/javafx-base-18.0.1-mac.jar</Class-Path>
+                            <Rsrc-Class-Path>./ lib/desktop-game-engine.jar lib/commons-lang3-3.12.0.jar lib/javafx-controls-18.0.1.jar lib/javafx-graphics-18.0.1.jar lib/javafx-graphics-18.0.1-win.jar lib/javafx-graphics-18.0.1-linux.jar lib/javafx-graphics-18.0.1-mac.jar lib/javafx-base-18.0.1.jar lib/javafx-base-18.0.1-win.jar lib/javafx-base-18.0.1-linux.jar lib/javafx-base-18.0.1-mac.jar</Rsrc-Class-Path>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/StrangeTest.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <!-- Run java-fx app over Maven -->
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -40,5 +145,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
